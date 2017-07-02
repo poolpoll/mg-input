@@ -60,7 +60,7 @@
 				placeholder="[[placeholder]]"
 				on-input="_onInput"/>
 
-			<img src="./images/clear-btn.png" on-tap="clearBtnTapped" />
+			<img hidden="hideClearBtn" src="./images/clear-btn.png" on-tap="clearBtnTapped" />
 			</div>
 		</div>
 		<div id="error-msg-container">
@@ -166,6 +166,15 @@
 				 * @type Boolean
 				 */
 				isValid: {
+					type: Boolean,
+					value: false
+				},
+
+				/**
+				 * hide clear btn or not
+				 * @type {Object}
+				 */
+				hideClearBtn: {
 					type: Boolean,
 					value: false
 				},
