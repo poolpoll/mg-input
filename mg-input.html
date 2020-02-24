@@ -1,257 +1,312 @@
-<link rel="import" href="../polymer/polymer.html" />
+<link rel="import" href="../polymer/polymer.html">
 
 <dom-module id="mg-input">
-  <template>
-    <style>
-      #container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        width: 100%;
-      }
-      #container .inner-container {
-        border-width: 0px 0px 1px 0px;
-        border-color: #cbcccb;
-        border-style: solid;
-      }
-      label {
-        word-wrap: break-word;
-        width: 10%;
-        font-size: 0.8rem;
-        padding-left: 5px;
-        padding-right: 5px;
-        vertical-align: middle;
-      }
-      input {
-        border-style: none;
-        width: 100%;
-        height: 100%;
-        font-size: 0.8rem;
-        padding: 2%;
-      }
-      #error-msg-container {
-        padding-top: 2%;
-        padding-left: 3%;
-        padding-right: 3%;
-      }
-      #error-msg {
-        padding: 2% 2% 2% 2%;
-        position: absolute;
-        background-color: #ffffff;
-        border: 2px solid #b23750;
-        border-radius: 5px;
-        font-size: 8pt;
-        color: #b23750;
-      }
-    </style>
+	<template>
+		<style>
+			:host {
+				width: var(--mg-input-width);
+			}
+			#container {
+				display: flex;
+				margin: auto;
+				flex-direction: row;
+				align-items: center;
+				width: var(--mg-input-width);
+				padding: var(--mg-input-padding, 0);
+				background-color: var(--mg-input-bgcolor, #FFFFFF);
+				border: var(--mg-input-border, 1px solid);
+				border-color: var(--mg-input-border-color, #CBCCCB);
+				border-radius: 5px;
+			}
+			label {
+				word-wrap: break-word;
+				width: 10%;
+				font-size: 0.8rem;
+				vertical-align: middle;
+			}
+			input {
+				display: block;
+				width: 90%;
+				height: var(--mg-input-height, 100%);
+				font-size: var(--mg-font-size);
+				text-align: var(--mg-input-text-align, left);
+				background-color: transparent;
+				margin: auto;
+				border: 0;
+			}
+			#error-msg {
+				padding: 2%;
+				position: absolute;
+				background-color: #FFFFFF;
+				border:2px solid #B23750;
+				border-radius: 5px;
+				font-size: 8pt;
+				color: #B23750;
+			}
+			#img-button {
+				padding-right: 2vw;
+				display: block;
+				width: var(--mg-input-btn-width);
+			}
+		</style>
 
-    <div id="container">
-      <label hidden="[[hideLabel]]">
-        [[label]]
-      </label>
-      <div id="container" class="inner-container">
-        <input
-          id="mg-input"
-          type="[[type]]"
-          min="[[min]]"
-          max="[[max]]"
-          required="[[required]]"
-          max-length="[[maxLength]]"
-          placeholder="[[placeholder]]"
-          on-input="_onInput"
-        />
+		<div>
+			<label hidden="[[hideLabel]]">
+				[[label]]
+			</label>
+			<div id="container">
+				<input
+					id="mg-input" 
+					type="[[type]]" 
+					min="[[min]]"
+					max="[[max]]"
+	        autocomplete$="[[autocomplete]]"
+	        autofocus$="[[autofocus]]"
+					required="[[required]]"
+					max-length="[[maxLength]]"
+					placeholder="[[placeholder]]"
+					on-input="_onInput" />
+				<div>
+					<img id="img-button" src="[[btnSrc]]" on-tap="_btnTapped" />
+				</div>
+			</div>
+		</div>
+	</template>
+	<script>
+		Polymer({
+			is: 'mg-input',
 
-        <img
-          hidden="hideClearBtn"
-          src="./images/clear-btn.png"
-          on-tap="clearBtnTapped"
-        />
-      </div>
-    </div>
-    <div id="error-msg-container">
-      <span id="error-msg" hidden="[[isValid]]">[[errorMessage]]</span>
-    </div>
-  </template>
-  <script>
-    Polymer({
-      is: "mg-input",
+			properties: {
 
-      properties: {
-        /**
-         * if hide label or not
-         * @type Boolean
-         */
-        hideLabel: {
-          type: Boolean,
-          value: false
-        },
+				valid: {
+					type: Boolean,
+					notify: true
+				},
 
-        /**
-         * label text
-         * @type String
-         */
-        label: {
-          type: String,
-          value: "Input"
-        },
+				/**
+				 * if hide label or not
+				 * @type Boolean
+				 */
+				hideLabel: {
+					type: Boolean,
+					value: false
+				},
 
-        /**
-         * input type
-         * @type String
-         */
-        type: {
-          type: String,
-          value: "text"
-        },
+				/**
+				 * label text
+				 * @type String
+				 */
+				label: {
+					type: String,
+					value: 'Input'
+				},
 
-        /**
-         * Value
-         * @type String
-         */
-        value: {
-          type: String,
-          observer: "_valueChanged",
-          notify: true
-        },
+				/**
+				 * input type
+				 * @type String
+				 */
+				type: {
+					type: String,
+					value: 'text',
+					observer: '_typeChanged'
+				},
 
-        /**
-         * Placeholder
-         * @type String
-         */
-        placeholder: {
-          type: String
-        },
+				defaultValue: {
+					observer: '_defaultValueChanged'
+				},
 
-        /**
-         * readonly
-         * @type Boolean
-         */
-        readonly: {
-          type: Boolean,
-          value: false,
-          observer: "_readonlyChanged"
-        },
+				/**
+				 * Value
+				 * @type String
+				 */
+				value: {
+					type: String,
+					observer: '_valueChanged',
+					notify: true
+				},
 
-        /**
-         * required
-         * @type Boolean
-         */
-        required: {
-          type: Boolean,
-          value: false
-        },
+				/**
+				 * Placeholder
+				 * @type String
+				 */
+				placeholder: {
+					type: String
+				},
 
-        /**
-         * Max Length of String
-         * @type Number
-         */
-        maxLength: {
-          type: Number
-        },
+				/**
+				 * Autofocus option
+				 * @type Boolean
+				 */
+				autofocus: {
+					type: Boolean,
+					value: false
+				},
 
-        /**
-         * Auto validation active / deactive
-         * @type Boolean
-         */
-        autoValidation: {
-          type: Boolean,
-          value: false
-        },
+				disabled: {
+					type: Boolean,
+					value: false
+				},
 
-        /**
-         * Validator function
-         * @type Function
-         */
-        validator: {
-          type: Function
-        },
+				/**
+				 * readonly
+				 * @type Boolean
+				 */
+				readonly: {
+					type: Boolean,
+					value: false,
+					observer: '_readonlyChanged'
+				},
 
-        /**
-         * Validation result
-         * @type Boolean
-         */
-        isValid: {
-          type: Boolean,
-          value: false
-        },
+				/**
+				 * required
+				 * @type Boolean
+				 */
+				required: {
+					type: Boolean,
+					value: false
+				},
 
-        /**
-         * hide clear btn or not
-         * @type {Object}
-         */
-        hideClearBtn: {
-          type: Boolean,
-          value: false
-        },
+				/**
+				 * Max Length of String
+				 * @type Number
+				 */
+				maxLength: {
+					type: Number
+				},
 
-        /**
-         * error message
-         * @type String
-         */
-        errorMessage: {
-          type: String,
-          value: "Invalid Input"
-        }
-      },
+				/**
+				 * Auto validation active / deactive
+				 * @type Boolean
+				 */
+				autoValidation: {
+					type: Boolean,
+					value: false
+				},
 
-      /**
-       * life cycle ready
-       * 컴퍼넌트 로드시 isValid를 true로 설정하여 errorMessage가 나타나지 않도록 함
-       */
-      ready: function() {
-        this.isValid = true;
-      },
+				/**
+				 * use custom validator or not
+				 * @type Boolean
+				 */
+				useCustomValidator: {
+					type: Boolean,
+					value: false
+				},
 
-      /**
-       * readonly property가 변경되면 작동하여 인풋 필드의 readonly 속성을 정의함
-       * @param  Boolean readonly
-       */
-      _readonlyChanged: function(readonly) {
-        if (readonly) {
-          this.$["mg-input"].setAttribute("readonly", true);
-        } else {
-          this.$["mg-input"].removeAttribute("readonly");
-        }
-      },
+				/**
+				 * Validator function
+				 * @type Function
+				 */
+				validator: {
+					type: Function
+				},
 
-      /**
-       * clear 버튼 클릭시 실행되며 input의 값을 제거함
-       */
-      clearBtnTapped: function() {
-        this.value = "";
-        this.$["mg-input"].value = "";
-      },
+				/**
+				 * Validation result
+				 * @type Boolean
+				 */
+				isValid: {
+					type: Boolean,
+					value: true,
+					notify: true
+				},
 
-      /**
-       * input 필드에 값이 들어 왔을때 발생하며 입력 받은 값을 this.value에 초기화
-       * @param  Object event on input event
-       */
-      _onInput: function(event) {
-        this.value = event.srcElement.value;
-      },
+				/**
+				 * error message
+				 * @type String
+				 */
+				errorMessage: {
+					type: String,
+					value: 'Invalid Input'
+				},
 
-      /**
-       * this.value가 변경 되었을 때 발생
-       * autovalidation을 수행하고 결과에 따라 isValid 값을 초기화하여 errorMessage 출력 여부를 결정함
-       * @param  String value
-       */
-      _valueChanged: function(value) {
-        if (this.autoValidation && !this.validator(value)) {
-          this.isValid = false;
-        } else {
-          this.isValid = true;
-          this.$["mg-input"].value = value;
-        }
-      },
+				btnSrc: {
+					type: String,
+					observer: '_btnSrcChanged'
+				}
+			},
 
-      /**
-       * input field의 validator를 셋팅함 외부에서 전달 받는 함수를 this.validator에 셋팅하여
-       * validation을 수행함 해당 함수는 반드시  true/false를 리턴해야함
-       * @param Function validator
-       */
-      setValidator: function(validator) {
-        this.validator = validator;
-      }
-    });
-  </script>
+			/**
+			 * readonly property가 변경되면 작동하여 인풋 필드의 readonly 속성을 정의함
+			 * @param  Boolean readonly
+			 */
+			_readonlyChanged: function(readonly) {
+				if(readonly) {
+					this.$['mg-input'].setAttribute('readonly', true);
+				} else {
+					this.$['mg-input'].removeAttribute('readonly');
+				}
+			},
+
+			/**
+			 * image button의 소스 URI이 있으면 버튼을 나타나게 하고 없으면 버튼을 숨김
+			 * @param  String btnSrc Button 이미지의 URI
+			 */
+			_btnSrcChanged: function(btnSrc) {
+				if(btnSrc) {
+					this.$['img-button'].removeAttribute('hidden');
+				} else {
+					this.$['img-button'].setAttribute('hidden', true);
+				}
+			},
+
+			/**
+			 * image button을 클릭했을 때 이벤트 발생
+			 */
+			_btnTapped: function() {
+				this.fire('mg-input-btn-tapped', this);
+			},
+
+			/**
+			 * input 필드에 값이 들어 왔을때 발생하며 입력 받은 값을 this.value에 초기화
+			 * @param  Object event on input event
+			 */
+			_onInput: function(event) {
+				this.value = event.srcElement.value;
+			},
+
+			_typeChanged: function(type) {
+				var input = this.$['mg-input'];
+				if(type == 'number') {
+					input.setAttribute('pattern', '[0-9]*');
+					input.setAttribute('inputmode', 'numeric');
+				};
+			},
+
+			_defaultValueChanged: function(defaultValue) {
+				this.value = defaultValue;
+			},
+
+			/**
+			 * this.value가 변경 되었을 때 발생
+			 * autovalidation을 수행하고 결과에 따라 isValid 값을 초기화하여 errorMessage 출력 여부를 결정함
+			 * @param  String value 
+			 */
+			_valueChanged: function(value) {
+				this.$['mg-input'].value = value;
+
+				if(this.autoValidation && this.useCustomValidator) {
+					this.isValid = this.validator(value);
+				} else if (this.autoValidation && !this.useCustomValidator) {
+					this.isValid = this.$['mg-input'].checkValidity();
+				} else {
+					this.isValid = true;
+				}
+			},
+
+			/**
+			 * input field의 validator를 셋팅함 외부에서 전달 받는 함수를 this.validator에 셋팅하여
+			 * validation을 수행함 해당 함수는 반드시  true/false를 리턴해야함
+			 * 
+			 * @param Function validator
+			 */
+			setValidator: function(validator) {
+				this.validator = validator;
+			},
+
+			focus: function(event) {
+				if(event) event.preventDefault();
+				this.$['mg-input'].focus();
+			}
+		})
+	</script>
 </dom-module>
